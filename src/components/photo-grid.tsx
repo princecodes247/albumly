@@ -2,15 +2,15 @@ import { IPhoto } from "@/db";
 
 
 interface PhotoGridProps {
-  photos: IPhoto[];
+  photos: Partial<IPhoto>[];
   setSelectedImage: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export function PhotoGrid({ photos, setSelectedImage }: PhotoGridProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {photos.map((photo, idx) => (
-        <div key={photo._id} onClick={() => setSelectedImage(idx)} className="relative aspect-square rounded-lg overflow-hidden group">
+      {photos?.map((photo, idx) => (
+        <div key={photo?._id?.toString()} onClick={() => setSelectedImage(idx)} className="relative aspect-square rounded-lg overflow-hidden group">
         {/* <div key={photo._id} onClick={() => setSelectedImage(photo._id.toString())} className="relative aspect-square rounded-lg overflow-hidden group"> */}
           <img
             src={photo.url}

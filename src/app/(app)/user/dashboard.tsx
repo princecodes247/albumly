@@ -1,6 +1,7 @@
 "use client"
 import { authClient } from "@/lib/auth-client"
 import { Album, BarChart3, Image, Users } from "lucide-react"
+import { CreateAlbumDialog } from "@/components/create-album-dialog"
 
 export default function User() {
   const {
@@ -27,11 +28,13 @@ export default function User() {
   }
 
   return (
-<>
-
-<div className="mb-8">
-        <h1 className="text-3xl font-bold">Welcome, {session?.user.name}</h1>
-        <p className="text-muted-foreground mt-2">Here's an overview of your account</p>
+    <>
+      <div className="mb-8 flex justify-between items-center">
+        <div className="pt-8">
+          <h1 className="text-3xl font-bold">Welcome, {session?.user.name}</h1>
+          <p className="text-muted-foreground mt-2">Here's an overview of your account</p>
+        </div>
+        <CreateAlbumDialog />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
