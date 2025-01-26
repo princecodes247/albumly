@@ -20,21 +20,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../ui/colla
 import { AppSidebarItem } from "./app-sidebar-item"
 import { RecentsSkeleton } from "./recents-skeleton"
 import { sidebarNavigationItems } from "@/lib/config/navigation"
-
-const recents = [
-  {
-    title: "Dating",
-    url: "#",
-    icon: <div className="p-3 rounded-full border border-black"></div>,
-  },
-  {
-    title: "Whats on Marriage",
-    url: "#",
-    icon: <div className="p-3 rounded-full border border-black"></div>,
-  },
-]
+import LogoutButton from "./logout-button"
 
 export function AppSidebar() {
+  
+
   return (
     <Sidebar className="">
       <SidebarHeader className="bg-white">
@@ -56,9 +46,7 @@ export function AppSidebar() {
       
       </SidebarContent>
       <SidebarFooter>
-      <Button className="w-full" >
-        Logout
-      </Button>
+      <LogoutButton/>
       </SidebarFooter>
     </Sidebar>
   )

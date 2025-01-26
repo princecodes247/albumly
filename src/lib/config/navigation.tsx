@@ -1,26 +1,27 @@
 import { Icons } from "@/components/icons";
-import { Home, PlusSquare } from "lucide-react";
-// sideMenu items.
+import { Home, PlusSquare, LayoutGrid, UserCircle, Settings } from "lucide-react";
+import { IconHome, IconHome2, IconLayoutGrid, IconSettings, IconUserCircle } from '@tabler/icons-react';
+
 export const sidebarNavigationItems = [
   {
     title: "Overview",
     url: "/user",
-    icon: <Home/>,
+    icon: <IconHome className="size-5" />,
   },
   {
     title: "Albums",
     url: "/user/albums",
-    icon: <Home/>,
+    icon: <IconLayoutGrid className="size-5" />,
   },
   {
     title: "Profile",
     url: "/user/profile",
-    icon: <Home/>,
+    icon: <IconUserCircle className="size-5" />,
   },
   {
     title: "Settings",
     url: "/user/settings",
-    icon: <Home/>,
+    icon: <IconSettings className="size-5" />,
   },
 
 ]

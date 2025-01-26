@@ -9,6 +9,12 @@ export default {
   ],
   theme: {
   	extend: {
+  		typography: {
+  			fontFamily: {
+  				sans: ['Outfit', 'sans-serif'],
+  				mono: ['Geist Mono', 'monospace'],
+  			},
+  		},
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',

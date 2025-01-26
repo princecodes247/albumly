@@ -3,7 +3,7 @@ import { Dialog, DialogClose, DialogContent } from "@/components/ui/dialog";
 import { IPhoto } from "@/db";
 import { cn } from "@/lib/utils";
 import { DialogTitle } from "@radix-ui/react-dialog";
-import { ArrowLeft, ArrowRight, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Heart, X } from "lucide-react";
 
 interface PhotoViewerProps {
   photos: IPhoto[];
@@ -43,13 +43,36 @@ export function PhotoViewer({ photos, selectedImage, setSelectedImage }: PhotoVi
                     </DialogClose> */}
                 <div className="relative w-full h-full border flex items-center justify-center flex-col">
                     {selectedImage !== null && (
-                        <>
-                            <div className="flex-1 flex justify-center items-center w-full h-full">
-                            <img
-                                src={`${photos[selectedImage].url}?w=1200&h=800&fit=crop`}
-                                alt={photos[selectedImage].caption}
-                                className="max-h-[40vh] object-contain"
-                            />
+                        <>                            <div className="flex-1 flex max-h-[80%] max-w-[80%] justify-center items-center w-full h-full">
+                                <img
+                                    src={`${photos[selectedImage].url}`}
+                                    alt={photos[selectedImage].caption}
+                                    className="h-full w-full object-contain"
+                                />
+                            </div>
+                            <div className="flex items-center gap-2 mb-4">
+                                <button
+                                    className="p-2 rounded-full hover:bg-black/20 transition-colors transform active:scale-75 transition-transform duration-150"
+                                    onClick={() => {
+                                        const photo = photos[selectedImage];
+                                        const isLiked = photo?.likes?.includes('user-id') || false;
+                                        const newLikes = isLiked
+                                            ? photo.likes?.filter(id => id !== 'user-id')
+                                            : [...(photo.likes || []), 'user-id'];
+                                        photos[selectedImage] = {
+                                            ...photo,
+                                            likes: newLikes
+                                        };
+                                        setSelectedImage(selectedImage);
+                                    }}
+                                >
+                                    {photos[selectedImage]?.likes?.includes('user-id') ? (
+                                        <Heart className="w-6 h-6 text-red-500 fill-red-500 animate-bounce" />
+                                    ) : (
+                                        <Heart className="w-6 h-6 text-red-500" />
+                                    )}
+                                </button>
+                                <span className="text-red-500 text-sm">{photos[selectedImage]?.likes?.length || 0} likes</span>
                             </div>
                             <div className="space-x-2 mt-6">
                                 {photos.map((image, index) => (
@@ -62,7 +85,7 @@ export function PhotoViewer({ photos, selectedImage, setSelectedImage }: PhotoVi
                                     )}
                                   >
                                     <img
-                                          src={`${image.url}?w=100&h=100&fit=crop`}
+                                          src={`${image.url}`}
                                           alt={image.caption}
                                           className="object-cover"
                                     />

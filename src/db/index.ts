@@ -36,6 +36,7 @@ const _SessionSchema = createSchema("session", {
 const _AlbumSchema = createSchema("album", {
   title: string(),
   description: string().default(""),
+  views: array(string()).default([]),
   userId: objectId(),
   archivedAt: date().nullable().default(null),
   createdAt: createdAt(),

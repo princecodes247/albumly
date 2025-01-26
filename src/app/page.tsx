@@ -4,85 +4,15 @@ import { Camera, Share2, Users, Shield, ArrowRight, Check, CreditCard, HelpCircl
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
+import Navbar from './(landing)/_components/navbar';
+import Hero from './(landing)/_components/hero';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-black text-white">
-      {/* Navbar */}
-      <nav className="fixed top-4 left-1/2 -translate-x-1/2 w-[95%] max-w-7xl z-50 bg-black/60 backdrop-blur-md border border-white/10 rounded-xl shadow-lg shadow-black/10">
-        <div className="container mx-auto px-6 py-4 flex justify-between items-center">
-          <Link href="/" className="text-2xl font-bold bg-gradient-to-r from-white to-white/60 bg-clip-text text-transparent">
-            Albumly
-          </Link>
-          <div className="hidden md:flex items-center gap-8 text-sm text-white/70">
-            <Link href="/features" className="hover:text-white transition-colors">Features</Link>
-            <Link href="/pricing" className="hover:text-white transition-colors">Pricing</Link>
-            <Link href="/about" className="hover:text-white transition-colors">About</Link>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/login">
-              <Button variant="ghost" className="text-sm text-white/70 hover:text-white">
-                Log in
-              </Button>
-            </Link>
-            <Link href="/signup">
-              <Button className="bg-white text-black hover:bg-white/90 text-sm px-6">
-                Sign up
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </nav>
-
+      <Navbar/>
       {/* Hero Section */}
-      <section className="pt-48 pb-32 relative overflow-hidden min-h-[80vh] flex justify-center items-center">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-indigo-500/20 via-transparent to-transparent opacity-70" />
-        <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto text-center">
-            <motion.h1
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-6xl md:text-8xl font-bold tracking-tight mb-12"
-            >
-              Your Memories,{' '}
-              <span className="bg-gradient-to-r from-indigo-400 to-indigo-600 bg-clip-text text-transparent">
-                Beautifully Preserved
-              </span>
-            </motion.h1>
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.2 }}
-              className="text-xl md:text-2xl text-white/60 mb-16 max-w-3xl mx-auto"
-            >
-              Create stunning digital albums that tell your story. Share moments with loved ones through a beautiful, secure platform designed for memories.
-            </motion.p>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8, delay: 0.4 }}
-              className="flex flex-col sm:flex-row gap-4 justify-center"
-            >
-              <Link href="/create">
-                <Button size="lg" className="w-full sm:w-auto bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-6">
-                  Start Creating
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/demo">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 px-8 py-6"
-                >
-                  View Demo
-                </Button>
-              </Link>
-            </motion.div>
-          </div>
-        </div>
-      </section>
+     <Hero/>
 
       {/* Album Creation Feature */}
       <section className="py-20 bg-gradient-to-r from-black/50 via-black/40 to-black/50 relative overflow-hidden">
