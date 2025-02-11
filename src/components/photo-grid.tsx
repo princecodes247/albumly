@@ -1,8 +1,9 @@
 import { IPhoto } from "@/db";
+import { Serialized } from "@/lib/utils";
 
 
 interface PhotoGridProps {
-  photos: Partial<IPhoto>[];
+  photos: Partial<Serialized<IPhoto>>[];
   setSelectedImage: React.Dispatch<React.SetStateAction<number | null>>;
 }
 

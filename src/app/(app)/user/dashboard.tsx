@@ -3,7 +3,7 @@ import { authClient } from "@/lib/auth-client"
 import { Album, BarChart3, Image, Users } from "lucide-react"
 import { CreateAlbumDialog } from "@/components/create-album-dialog"
 
-export default function Overview({stats}) {
+export default function Overview({stats, popularAlbums = []}) {
   const {
     data: session,
     isPending,
@@ -12,14 +12,15 @@ export default function Overview({stats}) {
 
   // These would come from your database/API
   const defaultStats = {
-    totalAlbums: 12,
-    totalPhotos: 156,
-    totalAlbumViews: 2345,
-    quotaUsed: 75, // percentage
-    quotaLimit: 1000, // total photos allowed
+    totalAlbums: 0,
+    totalPhotos: 0,
+    totalAlbumViews: 0,
+    quotaUsed: 0, // percentage
+    quotaLimit: 0, // total photos allowed
     ...stats,
   }
 
+  console.log({defaultStats, stats})
   if (isPending) {
     return <div className="p-8">Loading...</div>
   }
@@ -30,9 +31,9 @@ export default function Overview({stats}) {
 
   return (
     <>
-      <div className="mb-12 mt-4 flex justify-between items-center bg-gradient-to-r from-primary/10 via-transparent to-transparent p-8 rounded-lg">
+      <div className="mb-12 mt-4 flex justify-between items-center p-8 rounded-lg">
         <div>
-          <h1 className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">Welcome, {session?.user.name}</h1>
+          <h1 className="text-4xl font-bold">Welcome, {session?.user.name}</h1>
           <p className="text-muted-foreground mt-2 text-lg">Here's an overview of your account</p>
         </div>
         <CreateAlbumDialog />
@@ -94,15 +95,15 @@ export default function Overview({stats}) {
         <div className="p-8 rounded-lg border bg-card hover:bg-accent/5 transition-all duration-300">
           <h3 className="text-2xl font-semibold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">Popular Albums</h3>
           <div className="space-y-4">
-            {[1, 2, 3, 4, 5].map((_, i) => (
+            {popularAlbums?.map((album, i) => (
               <div key={i} className="flex items-center justify-between py-3 border-b last:border-0 hover:bg-accent/5 transition-colors rounded-lg px-3 -mx-3">
                 <div className="flex items-center gap-3">
                   <Album className="w-5 h-5 text-muted-foreground" />
-                  <span>Album {i + 1}</span>
+                  <span>{album.title}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Users className="w-4 h-4 text-muted-foreground" />
-                  <span>{Math.floor(Math.random() * 1000)} views</span>
+                  <span>{album?.views?.length ?? 0} views</span>
                 </div>
               </div>
             ))}

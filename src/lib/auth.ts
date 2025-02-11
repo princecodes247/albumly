@@ -9,7 +9,7 @@ export const auth = betterAuth({
     },
     accountLinking: {
         enabled: true,
-        trustedProviders: ["google", "github"]
+        trustedProviders: ["google"]
     }
     // socialProviders: { 
     //    github: { 

@@ -36,7 +36,6 @@ export default function CreateAlbum() {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("description", description);
-    formData.append("userId", session?.user?.id ?? "");
     photos.forEach(photo => formData.append("files[]", photo));
     const albumId = await createAlbumAction(formData);
 

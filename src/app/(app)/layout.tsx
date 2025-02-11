@@ -17,7 +17,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 <AppLayout>
           <Header />
 
-              {children}
+             <div className="p-6">
+               {children}
+             </div>
                 </AppLayout>
 
           </div>

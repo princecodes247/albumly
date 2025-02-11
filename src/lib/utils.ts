@@ -25,7 +25,7 @@ type Serializable = {
   toString(): any;
 };
 
-type Serialized<T> = T extends Serializable
+export type Serialized<T> = T extends Serializable
   ? ReturnType<T['toString']>
   : T extends (infer U)[]
   ? Serialized<U>[]

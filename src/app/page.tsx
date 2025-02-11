@@ -363,6 +363,61 @@ export default function Home() {
           </motion.div>
         </div>
       </section>
+
+      {/* Footer Section */}
+      <footer className="py-20 bg-black border-t border-white/10">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-12">
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold">Product</h4>
+              <ul className="space-y-2">
+                <li><Link href="/features" className="text-white/60 hover:text-white transition-colors">Features</Link></li>
+                <li><Link href="/pricing" className="text-white/60 hover:text-white transition-colors">Pricing</Link></li>
+                <li><Link href="/demo" className="text-white/60 hover:text-white transition-colors">Demo</Link></li>
+                <li><Link href="/security" className="text-white/60 hover:text-white transition-colors">Security</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold">Company</h4>
+              <ul className="space-y-2">
+                <li><Link href="/about" className="text-white/60 hover:text-white transition-colors">About</Link></li>
+                <li><Link href="/blog" className="text-white/60 hover:text-white transition-colors">Blog</Link></li>
+                <li><Link href="/careers" className="text-white/60 hover:text-white transition-colors">Careers</Link></li>
+                <li><Link href="/contact" className="text-white/60 hover:text-white transition-colors">Contact</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold">Support</h4>
+              <ul className="space-y-2">
+                <li><Link href="/help" className="text-white/60 hover:text-white transition-colors">Help Center</Link></li>
+                <li><Link href="/documentation" className="text-white/60 hover:text-white transition-colors">Documentation</Link></li>
+                <li><Link href="/status" className="text-white/60 hover:text-white transition-colors">Status</Link></li>
+                <li><Link href="/terms" className="text-white/60 hover:text-white transition-colors">Terms of Service</Link></li>
+              </ul>
+            </div>
+            <div className="space-y-4">
+              <h4 className="text-lg font-semibold">Connect</h4>
+              <ul className="space-y-2">
+                <li><a href="https://twitter.com/albumly" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">Twitter</a></li>
+                <li><a href="https://facebook.com/albumly" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">Facebook</a></li>
+                <li><a href="https://instagram.com/albumly" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">Instagram</a></li>
+                <li><a href="https://linkedin.com/company/albumly" target="_blank" rel="noopener noreferrer" className="text-white/60 hover:text-white transition-colors">LinkedIn</a></li>
+              </ul>
+            </div>
+          </div>
+          <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div className="flex items-center gap-2">
+              <Link href="/" className="text-xl font-bold">Albumly</Link>
+              <span className="text-white/60">&copy; {new Date().getFullYear()} All rights reserved.</span>
+            </div>
+            <div className="flex items-center gap-4">
+              <Link href="/privacy" className="text-white/60 hover:text-white transition-colors">Privacy Policy</Link>
+              <Link href="/terms" className="text-white/60 hover:text-white transition-colors">Terms of Service</Link>
+              <Link href="/cookies" className="text-white/60 hover:text-white transition-colors">Cookie Policy</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

@@ -5,14 +5,15 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Trash2 } from "lucide-react";
-import { archiveAlbumAction } from "@/actions/album.actions";
+import { archiveAlbumAction, getUserAlbumsAction } from "@/actions/album.actions";
 import { isAuth } from "@/middleware/auth";
 import { toObjectId } from "monarch-orm";
+import { revalidatePath } from "next/cache";
 
 export default async function AlbumsPage() {
   const session = await isAuth()
 
-  const albums = serializeValues(await collections.album.find({ userId: toObjectId(session?.user.id ?? ""), archivedAt: null }).populate({photos: true}).exec());
+  const albums = await getUserAlbumsAction(session?.user?.id ?? "");
 
   return (
     <div className="container mx-auto p-8">
@@ -76,6 +77,7 @@ export default async function AlbumsPage() {
                   <form action={async () => {
                     "use server";
                     await archiveAlbumAction(album._id)
+                    revalidatePath("/user/albums")
                     }}>
                     <input type="hidden" name="id" value={album._id} />
                     <Button type="submit" variant="destructive">Delete Album</Button>

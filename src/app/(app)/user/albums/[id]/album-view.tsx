@@ -1,14 +1,38 @@
 'use client';
 
-import { collections } from "@/db";
-import { serializeValues } from "@/lib/utils";
-import { ArrowLeft, ChevronLeft, Eye, Heart, X } from "lucide-react";
+import { IAlbum, IAlbumVisibility } from "@/db";
+import { ChevronLeft, Eye, Heart, Image, Plus, Settings, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { PhotoModal } from "@/components/photo-modal";
+import { FileUpload } from "@/components/ui/file-upload";
+import { addPhotosToAlbumAction, GetUserAlbumActionResponse } from "@/actions/album.actions";
+import { AlbumSettingsDialog } from "@/components/album-settings-dialog";
 
-export default function AlbumView({ album }) {
+
+export default function AlbumView({ album }: { album: NonNullable<GetUserAlbumActionResponse>}) {
   const [selectedPhotoIndex, setSelectedPhotoIndex] = useState<number | null>(null);
+  const [isAddingPhotos, setIsAddingPhotos] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [albumState, setAlbumState] = useState(album)
+  const [albumSettings, setAlbumSettings] = useState({
+    title: album?.title,
+    description: album?.description || "",
+    visibility: album?.visibility || "public",
+    password: album?.password || "",
+    hasWatermark: album?.hasWatermark || false,
+    canDownload: album?.canDownload,
+    hasPublicUpload: album?.hasPublicUpload || false
+  });
+
+  const handleUpload = async (files: File[]) => {
+    const formData = new FormData();
+    formData.append("id", album._id.toString());
+    files.forEach(photo => formData.append("files[]", photo));
+    const result  = await addPhotosToAlbumAction(formData);
+    setIsAddingPhotos(false);
+    setAlbumState(prev => ({...prev, photos: [...prev.photos, ...result.images]}))
+  };
 
   if (!album) {
     return <div>Album not found</div>;
@@ -30,18 +54,52 @@ export default function AlbumView({ album }) {
               <p className="text-lg text-muted-foreground">{album.description}</p>
             )}
           </div>
-          <Link 
-            href={`/albums/${album._id}`} 
-            target="_blank" 
-            className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-          >
-            Preview Album
-          </Link>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setIsAddingPhotos(!isAddingPhotos)}
+              className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" /> Add Photos
+            </button>
+            <Link 
+              href={`/albums/${album._id}`} 
+              target="_blank" 
+              className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors"
+            >
+              Preview Album
+            </Link>
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 transition-colors flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
+        {isAddingPhotos && (
+          <div className="mb-6">
+            <FileUpload onUpload={handleUpload} />
+          </div>
+        )}
+
         <div className="space-y-4">
+          <div className="flex items-center gap-6 py-3 px-4 bg-card rounded-lg">
+            <div className="flex items-center gap-2">
+              <Eye className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">{albumState.photos.reduce((acc, photo) => acc + (photo?.views?.length || 0), 0)} views</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Heart className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">{albumState.photos.reduce((acc, photo) => acc + (photo?.likes?.length || 0), 0)} likes</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Image className="w-4 h-4 text-muted-foreground" />
+              <span className="text-sm">{albumState.photos.length} photos</span>
+            </div>
+          </div>
           <h2 className="text-2xl font-semibold tracking-tight">Photos</h2>
-          {album.photos.length === 0 ? (
+          {albumState.photos.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl bg-card">
               <div className="w-16 h-16 mb-4 text-muted-foreground">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -50,13 +108,7 @@ export default function AlbumView({ album }) {
               </div>
               <h3 className="text-lg font-medium">No photos yet</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-4">Start adding photos to your album</p>
-              <Link 
-                href={`/albums/${album._id}`} 
-                target="_blank" 
-                className="px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                Add Photos
-              </Link>
+              
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -105,6 +157,13 @@ export default function AlbumView({ album }) {
           onPhotoChange={(index) => setSelectedPhotoIndex(index)}
         />
       )}
+
+      <AlbumSettingsDialog
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+        albumSettings={albumSettings}
+        onSettingsChange={setAlbumSettings}
+      />
     </div>
   );
 }

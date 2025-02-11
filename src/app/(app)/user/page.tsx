@@ -19,7 +19,7 @@ export default async function UserPage(){
 
 
 const results = await collections.album.aggregate().addStage({
-    $match: { userId: toObjectId(session?.user.id ?? "") },
+    $match: { userId: toObjectId(session?.user.id ?? ""), archivedAt: null },
 }).addStage({
     $lookup: {
       from: "photo", // Join with the photos collection
@@ -62,10 +62,21 @@ const results = await collections.album.aggregate().addStage({
     },
   }).exec();
 
+  console.log({results})
+
+  const popularAlbums = await collections.album.find({ userId: toObjectId(session?.user.id ?? ""), archivedAt: null }).select({
+    title: true,
+    views: true
+  }).sort({
+    views: 1
+  }).limit(5)
+
+
+  
 console.log({results});
 
 
     return (
-        <Overview stats={serializeValues(results[0])}/>
+        <Overview stats={serializeValues(results[0])} popularAlbums={serializeValues(popularAlbums)}/>
     )
 }

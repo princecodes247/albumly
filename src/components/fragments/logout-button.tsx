@@ -13,7 +13,7 @@ const LogoutButton = ({ onLogout }: { onLogout?: () => void }) => {
   }
 
   return (
-    <Button className="w-full" onClick={handleLogout}>
+    <Button variant={"ghost"} className="w-full text-destructive" onClick={handleLogout}>
       Logout
     </Button>
   );

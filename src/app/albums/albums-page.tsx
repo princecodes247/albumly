@@ -2,14 +2,17 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { useAlbumStore } from '@/lib/store';
 import { formatDistanceToNow } from 'date-fns';
 import { archiveAlbumAction } from '@/actions/album.actions';
 
 export default function Albums({albums}) {
+  const router = useRouter();
+  
   const handleDelete = async (id: string) => {
     const res = await archiveAlbumAction(id);
-    console.log({res})
+    router.refresh();
   };
 
   return (

@@ -7,11 +7,13 @@ import { PhotoGrid } from '@/components/photo-grid';
 import { FileUpload } from '@/components/ui/file-upload';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { addPhotosToAlbumAction } from '@/actions/album.actions';
+import { addPhotosToAlbumAction, GetAlbumActionResponse } from '@/actions/album.actions';
 import { IPhotoInput } from '@/db';
 import { PhotoViewer } from './photo-viewer';
+import { useSession } from 'next-auth/react';
+import { Button } from '@/components/ui/button';
 
-export default function AlbumView({album}) {
+export default function AlbumView({album}: {album: GetAlbumActionResponse}) {
   const [isAddingPhotos, setIsAddingPhotos] = useState(false);
   const [selectedImage, setSelectedImage] = useState<number | null>(null);
 
@@ -52,13 +54,17 @@ export default function AlbumView({album}) {
             )}
           </div>
           <div className="flex gap-3">
-            <button
+            {
+              album.publicUpload && (
+                <button
               onClick={() => setIsAddingPhotos(!isAddingPhotos)}
               className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
             >
               <Plus className="w-5 h-5 mr-2" />
               Add Photos
             </button>
+              )
+            }
             <button
               onClick={() => navigator.clipboard.writeText(shareUrl)}
               className="inline-flex items-center px-4 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors"

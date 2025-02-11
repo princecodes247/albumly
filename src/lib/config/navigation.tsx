@@ -14,8 +14,8 @@ export const sidebarNavigationItems = [
     icon: <IconLayoutGrid className="size-5" />,
   },
   {
-    title: "Profile",
-    url: "/user/profile",
+    title: "Billing",
+    url: "/user/billing",
     icon: <IconUserCircle className="size-5" />,
   },
   {

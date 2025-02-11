@@ -4,58 +4,41 @@ import { putFilesInCloudinaryServer, putFilesServer } from "./upload.actions";
 
 import { serializeValues } from "@/lib/utils";
 import { toObjectId } from "monarch-orm";
+import { isAuth } from "@/middleware/auth";
 
 export const createAlbumAction = async (formData: FormData) => {
-    // (name: string, description:string, userId: string, photos: string[]) => {
+    const {user} = await isAuth();
+    if (!user?.id) {
+        throw new Error("Unauthorized");
+    }
+
     const name = formData.get("name");
-    const userId = formData.get("userId")
+    const privacy = formData.get("privacy");
+    const password = formData.get("password");
+    const enableWatermark = formData.get("enableWatermark") === "true";
+    const allowDownload = formData.get("allowDownload") === "true";
+    const publicUpload = formData.get("publicUpload") === "true";
 
     if (!name || typeof name !== 'string' || name.trim() === '') {
         throw new Error("Invalid name provided");
     }
-    if (!userId || typeof userId !== 'string' || userId.trim() === '') {
-        throw new Error("Invalid userId provided");
-    }
 
-
-    const rawFormData = {
-        photos: [] as File[],
-        name,
-        description: (formData.get("description") ?? "").toString(),
-        userId,
-    };
-
-    // Extract files from the FormData
-    formData.forEach((value, key) => {
-        if (key === "files[]" && value instanceof File) {
-            rawFormData.photos.push(value);
-        }
-    });
     try {
         const album = {
-            title: rawFormData.name,
-            description: rawFormData.description,
-            userId: rawFormData.userId,
+            title: name,
+            description: (formData.get("description") ?? "").toString(),
+            userId: user.id,
+            visibility: (privacy || "private") as "private" | "public" | "unlisted",
+            password: password ? String(password) : null,
+            watermarkEnabled: enableWatermark,
+            downloadEnabled: allowDownload,
+            publicUpload,
             createdAt: new Date(),
             updatedAt: new Date(),
         };
 
         const newAlbum = await collections.album.insertOne(album).exec();
-
-
-        const result = await putFilesInCloudinaryServer({
-            files: rawFormData.photos,
-        });
-
-        const images = await collections.photo.insertMany(result.data.map((file, index) => ({
-            albumId: newAlbum._id,
-            url: file.url,
-            public_id: file.public_id,
-            order: index + 1,
-        })),
-        ).exec();
-
-        return newAlbum._id.toString(); // Return the ID of the created album
+        return newAlbum._id.toString();
     } catch (error) {
         console.error("Error creating album:", error);
         throw new Error("Failed to create album");
@@ -86,13 +69,13 @@ export const addPhotosToAlbumAction = async (formData: FormData) => {
         files: rawFormData.files,
     });
 
-    const images = await collections.photo.insertMany(result.data.map((file, index) => ({
+    const images = result.data.map((file, index) => ({
         albumId: album._id,
         url: file.url,
         public_id: file.public_id,
         // order: index + 1,
     }))
-    ).exec();
+    await collections.photo.insertMany(images).exec();
 
     return serializeValues({ ...album, images });
 }
@@ -128,3 +111,78 @@ export const archiveAlbumAction = async (albumId: string) => {
         throw new Error("Failed to archive album");
     }
 }
+
+export const getAlbumAction = async (albumId: string) => {
+    try {
+        const validAlbumId = toObjectId(albumId);
+        if (!validAlbumId) {
+            return null
+        }
+
+        const album = serializeValues(
+            await collections.album.findOne({
+                _id: validAlbumId,
+                archivedAt: null
+            }).populate({ photos: true }).exec()
+        );
+
+        if (!album) {
+            throw new Error("Album not found");
+        }
+
+        await collections.album.updateOne({
+            _id: validAlbumId
+          }, {
+            $push: {
+              views: ""
+            }
+          })
+        return album;
+    } catch (error) {
+        console.error("Error fetching album:", error);
+        throw new Error("Failed to fetch album");
+    }
+}
+
+export const getUserAlbumsAction = async (userId: string) => {
+    try {
+        const validUserId = toObjectId(userId);
+        if (!validUserId) {
+            return [];
+        }
+
+        const albums = await collections.album.find({ userId: validUserId, archivedAt: null }).populate({photos: true}).exec()
+
+        return serializeValues(albums);
+    } catch (error) {
+        console.error("Error fetching album by ID:", error);
+        throw new Error("Failed to fetch album");
+    }
+}
+
+export const getUserAlbumAction = async (id: string, userId: string) => {
+    try {
+        const validId = toObjectId(id);
+        const validUserId = toObjectId(userId);
+        if (!validId || !validUserId) {
+            return null;
+        }
+
+        const album = await collections.album
+            .findOne({_id: validId, userId: validUserId, archivedAt: null})
+            .populate({ photos: true })
+            .exec();
+
+        if (!album) {
+            throw new Error("Album not found");
+        }
+
+        return serializeValues(album);
+    } catch (error) {
+        console.error("Error fetching album by ID:", error);
+        throw new Error("Failed to fetch album");
+    }
+}
+
+export type GetAlbumActionResponse = Awaited<ReturnType<typeof getAlbumAction>>;
+export type GetUserAlbumActionResponse = Awaited<ReturnType<typeof getUserAlbumAction>>;
