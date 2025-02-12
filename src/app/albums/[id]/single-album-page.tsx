@@ -55,7 +55,7 @@ export default function AlbumView({album}: {album: GetAlbumActionResponse}) {
           </div>
           <div className="flex gap-3">
             {
-              album.publicUpload && (
+              album.allowPublicUpload && (
                 <button
               onClick={() => setIsAddingPhotos(!isAddingPhotos)}
               className="inline-flex items-center px-4 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"

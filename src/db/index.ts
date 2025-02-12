@@ -47,7 +47,7 @@ const _AlbumSchema = createSchema("album", {
   archivedAt: date().nullable().default(null),
   visibility: literal("private", "public", "unlisted").default("private"),
   password: string().nullable().default(null),
-  hasPublicUpload: boolean().default(false), // Add this field
+  allowPublicUpload: boolean().default(false), // Add this field
   expiresAt: date().nullable().default(null),
   price: number().nullable().default(null),
   collaborators: array(objectId()).default([]),
@@ -61,7 +61,7 @@ const _AlbumSchema = createSchema("album", {
 
 const _PhotoSchema = createSchema("photo", {
   url: string(),
-  public_id: string(),
+  publicId: string(),
   caption: string().optional(),
   order: number().default(0),
   albumId: objectId(),

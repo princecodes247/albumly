@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useState } from "react";
 import { PhotoModal } from "@/components/photo-modal";
 import { FileUpload } from "@/components/ui/file-upload";
-import { addPhotosToAlbumAction, GetUserAlbumActionResponse } from "@/actions/album.actions";
+import { addPhotosToAlbumAction, deletePhotoFromAlbumAction, editAlbumAction, GetUserAlbumActionResponse } from "@/actions/album.actions";
 import { AlbumSettingsDialog } from "@/components/album-settings-dialog";
 
 
@@ -22,17 +22,33 @@ export default function AlbumView({ album }: { album: NonNullable<GetUserAlbumAc
     password: album?.password || "",
     hasWatermark: album?.hasWatermark || false,
     canDownload: album?.canDownload,
-    hasPublicUpload: album?.hasPublicUpload || false
+    allowPublicUpload: album?.allowPublicUpload || false
   });
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadingPhotos, setUploadingPhotos] = useState<number>(0);
 
   const handleUpload = async (files: File[]) => {
+    setIsUploading(true);
+    setUploadingPhotos(files.length);
     const formData = new FormData();
     formData.append("id", album._id.toString());
     files.forEach(photo => formData.append("files[]", photo));
-    const result  = await addPhotosToAlbumAction(formData);
+    const result = await addPhotosToAlbumAction(formData);
     setIsAddingPhotos(false);
+    setIsUploading(false);
+    setUploadingPhotos(0);
     setAlbumState(prev => ({...prev, photos: [...prev.photos, ...result.images]}))
   };
+
+  const handleDelete = async (photoId: string) => {
+    await deletePhotoFromAlbumAction(photoId, album._id);
+    const updatedPhotos = albumState.photos.filter(photo => photo._id !== photoId);
+    setAlbumState(prev => ({...prev, photos: updatedPhotos}))
+  }
+
+  const handleEditAlbum = async () => {
+    await editAlbumAction(album._id, albumSettings)
+  }
 
   if (!album) {
     return <div>Album not found</div>;
@@ -99,7 +115,7 @@ export default function AlbumView({ album }: { album: NonNullable<GetUserAlbumAc
             </div>
           </div>
           <h2 className="text-2xl font-semibold tracking-tight">Photos</h2>
-          {albumState.photos.length === 0 ? (
+          {albumState.photos.length === 0 && !isUploading ? (
             <div className="flex flex-col items-center justify-center py-12 text-center rounded-xl bg-card">
               <div className="w-16 h-16 mb-4 text-muted-foreground">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -108,13 +124,12 @@ export default function AlbumView({ album }: { album: NonNullable<GetUserAlbumAc
               </div>
               <h3 className="text-lg font-medium">No photos yet</h3>
               <p className="text-sm text-muted-foreground mt-1 mb-4">Start adding photos to your album</p>
-              
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {album.photos.map((photo, index) => (
+              {albumState.photos.map((photo, index) => (
               <div 
-                key={photo._id} 
+                key={photo?.url} 
                 className="group relative overflow-hidden rounded-xl border bg-card transition-all duration-200 hover:shadow-lg cursor-pointer"
                 onClick={() => setSelectedPhotoIndex(index)}
               >
@@ -137,13 +152,35 @@ export default function AlbumView({ album }: { album: NonNullable<GetUserAlbumAc
                   </div>
                 </div>
                 <button 
-                  className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm opacity-0 transition-opacity group-hover:opacity-100 hover:bg-background" 
-                  // onClick={() => handleDelete(photo._id)}
+                  className="absolute top-2 right-2 p-2 rounded-full bg-background/80 backdrop-blur-sm opacity-0 transition-opacity group-hover:opacity-100 hover:bg-background"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleDelete(photo._id);
+                  }}
                 >
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
+              {isUploading && Array.from({ length: uploadingPhotos }).map((_, index) => (
+                <div key={`skeleton-${index}`} className="group relative overflow-hidden rounded-xl border bg-card transition-all duration-200">
+                  <div className="aspect-[4/3] overflow-hidden animate-pulse bg-muted">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <svg className="w-8 h-8 text-muted-foreground animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="p-4">
+                    <div className="h-4 bg-muted rounded w-3/4 animate-pulse"></div>
+                    <div className="flex items-center gap-4 mt-2">
+                      <div className="h-4 bg-muted rounded w-1/4 animate-pulse"></div>
+                      <div className="h-4 bg-muted rounded w-1/4 animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
           </div>
           )}
         </div>
@@ -163,6 +200,7 @@ export default function AlbumView({ album }: { album: NonNullable<GetUserAlbumAc
         onOpenChange={setIsSettingsOpen}
         albumSettings={albumSettings}
         onSettingsChange={setAlbumSettings}
+        handleChange={handleEditAlbum}
       />
     </div>
   );

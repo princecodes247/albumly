@@ -18,16 +18,18 @@ interface AlbumSettingsDialogProps {
     password: string;
     hasWatermark: boolean;
     canDownload: boolean;
-    hasPublicUpload: boolean;
+    allowPublicUpload: boolean;
   };
   onSettingsChange: (settings: any) => void;
+  handleChange: () => Promise<void>;
 }
 
 export function AlbumSettingsDialog({ 
   open, 
   onOpenChange, 
   albumSettings, 
-  onSettingsChange 
+  onSettingsChange,
+  handleChange
 }: AlbumSettingsDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -96,15 +98,18 @@ export function AlbumSettingsDialog({
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label htmlFor="hasPublicUpload">Allow Public Uploads</Label>
+            <Label htmlFor="allowPublicUpload">Allow Public Uploads</Label>
             <Switch
-              id="hasPublicUpload"
-              checked={albumSettings.hasPublicUpload}
-              onCheckedChange={(checked) => onSettingsChange({ ...albumSettings, hasPublicUpload: checked })}
+              id="allowPublicUpload"
+              checked={albumSettings.allowPublicUpload}
+              onCheckedChange={(checked) => onSettingsChange({ ...albumSettings, allowPublicUpload: checked })}
             />
           </div>
         </div>
-        <Button onClick={() => onOpenChange(false)} className="w-full">Save Changes</Button>
+        <Button onClick={async () => {
+            await handleChange()
+            onOpenChange(false)
+            }} className="w-full">Save Changes</Button>
       </DialogContent>
     </Dialog>
   );

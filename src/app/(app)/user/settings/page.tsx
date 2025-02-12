@@ -12,6 +12,7 @@ import { User, Mail, Lock, Loader2, Globe, Bell, Key, Share2, Phone } from "luci
 import { authClient } from "@/lib/auth-client";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { IconBrandFacebook, IconBrandInstagram, IconBrandLinkedin, IconBrandTwitter } from "@tabler/icons-react";
+import { updateProfile, updatePassword, updatePrivacy, updateNotifications, verifyPassword } from "@/actions/settings.actions";
 
 export default function SettingsPage() {
   const { data: session } = authClient.useSession();
@@ -52,8 +53,59 @@ export default function SettingsPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // TODO: Implement update logic
-    setTimeout(() => setLoading(false), 1000);
+    try {
+      const profileData = {
+        username: formData.username,
+        displayName: formData.displayName,
+        email: formData.email,
+        phone: formData.phone,
+        bio: formData.bio,
+        avatar: formData.avatar,
+        language: formData.language,
+        twitter: formData.twitter,
+        instagram: formData.instagram,
+        facebook: formData.facebook,
+        linkedin: formData.linkedin
+      };
+      await updateProfile(profileData);
+    } catch (error) {
+      console.error('Error saving changes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyPassword = async () => {
+    if (!formData.currentPassword) return;
+    setLoading(true);
+    try {
+      await verifyPassword(formData.currentPassword);
+      setFormData({ ...formData, passwordVerified: true, currentPassword: "" });
+    } catch (error) {
+      console.error('Error verifying password:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdatePassword = async () => {
+    if (!formData.newPassword || !formData.confirmPassword) return;
+    if (formData.newPassword !== formData.confirmPassword) {
+      // TODO: Show error message
+      return;
+    }
+    setLoading(true);
+    try {
+      await updatePassword({
+        currentPassword: formData.currentPassword,
+        newPassword: formData.newPassword
+      });
+      setFormData({ ...formData, passwordVerified: false, newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      console.error('Error updating password:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -64,11 +116,11 @@ export default function SettingsPage() {
       </div>
 
       <Tabs defaultValue="general" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="privacy">Privacy & Security</TabsTrigger>
           <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="api">API & Integrations</TabsTrigger>
+          {/* <TabsTrigger value="api">API & Integrations</TabsTrigger> */}
         </TabsList>
 
         <TabsContent value="general">
@@ -140,24 +192,6 @@ export default function SettingsPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>Language</Label>
-                <Select
-                  value={formData.language}
-                  onValueChange={(value) => setFormData({ ...formData, language: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select language" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="en">English</SelectItem>
-                    <SelectItem value="es">Spanish</SelectItem>
-                    <SelectItem value="fr">French</SelectItem>
-                    <SelectItem value="de">German</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="space-y-4">
                 <Label>Social Links</Label>
                 <div className="grid grid-cols-2 gap-4">
@@ -186,32 +220,107 @@ export default function SettingsPage() {
         <TabsContent value="privacy">
           <Card className="p-6">
             <form className="space-y-6">
-              <div className="space-y-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <div className="relative">
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    value={formData.currentPassword}
-                    onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
-                    className="pl-10"
-                  />
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    value={formData.newPassword}
-                    onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
-                    className="pl-10"
-                  />
-                  <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
-                </div>
+              <div className="space-y-4">
+                <Label>Change Password</Label>
+                {!formData.passwordVerified ? (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="currentPassword"
+                          type="password"
+                          value={formData.currentPassword}
+                          onChange={(e) => setFormData({ ...formData, currentPassword: e.target.value })}
+                          className="pl-10"
+                        />
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <Button
+                      type="button"
+                      onClick={async () => {
+                        setLoading(true);
+                        // TODO: Implement password verification
+                        await new Promise(resolve => setTimeout(resolve, 1000));
+                        setFormData({ ...formData, passwordVerified: true, currentPassword: "" });
+                        setLoading(false);
+                      }}
+                      disabled={!formData.currentPassword || loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Verifying...
+                        </>
+                      ) : (
+                        'Verify Password'
+                      )}
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type="password"
+                          value={formData.newPassword}
+                          onChange={(e) => setFormData({ ...formData, newPassword: e.target.value })}
+                          className="pl-10"
+                        />
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword || ''}
+                          onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                          className="pl-10"
+                        />
+                        <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setFormData({ ...formData, passwordVerified: false, newPassword: "", confirmPassword: "" })}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        onClick={async () => {
+                          if (formData.newPassword !== formData.confirmPassword) {
+                            // TODO: Show error message
+                            return;
+                          }
+                          setLoading(true);
+                          // TODO: Implement password update
+                          await new Promise(resolve => setTimeout(resolve, 1000));
+                          setFormData({ ...formData, passwordVerified: false, newPassword: "", confirmPassword: "" });
+                          setLoading(false);
+                        }}
+                        disabled={!formData.newPassword || !formData.confirmPassword || loading}
+                      >
+                        {loading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Updating...
+                          </>
+                        ) : (
+                          'Update Password'
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

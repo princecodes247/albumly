@@ -3,7 +3,7 @@ import { collections, IPhotoInput } from "@/db";
 import { putFilesInCloudinaryServer, putFilesServer } from "./upload.actions";
 
 import { serializeValues } from "@/lib/utils";
-import { toObjectId } from "monarch-orm";
+import { generateObjectId, toObjectId } from "monarch-orm";
 import { isAuth } from "@/middleware/auth";
 
 export const createAlbumAction = async (formData: FormData) => {
@@ -45,6 +45,62 @@ export const createAlbumAction = async (formData: FormData) => {
     }
 };
 
+interface EditAlbumInput {
+    title?: string;
+    description?: string;
+    visibility?: "private" | "public" | "unlisted";
+    password?: string | null;
+    hasWatermark?: boolean;
+    canDownload?: boolean;
+    allowPublicUpload?: boolean;
+}
+
+export const editAlbumAction = async (id: string, input: EditAlbumInput) => {
+    const { user } = await isAuth();
+    if (!user?.id) {
+        throw new Error("Unauthorized");
+    }
+
+    const validAlbumId = toObjectId(id);
+    if (!validAlbumId) {
+        throw new Error("Invalid album ID format");
+    }
+
+    // Verify album ownership
+    const existingAlbum = await collections.album.findOne({
+        _id: validAlbumId,
+        userId: toObjectId(user.id)
+    }).exec();
+
+    if (!existingAlbum) {
+        throw new Error("Album not found or unauthorized");
+    }
+
+    try {
+        const updates = {
+            ...(input.title && { title: input.title }),
+            ...(input.description !== undefined && { description: input.description }),
+            ...(input.visibility && { visibility: input.visibility }),
+            ...(input.password !== undefined && { password: input.password }),
+            ...(input.hasWatermark !== undefined && { hasWatermark: input.hasWatermark }),
+            ...(input.canDownload !== undefined && { canDownload: input.canDownload }),
+            ...(input.allowPublicUpload !== undefined && { allowPublicUpload: input.allowPublicUpload }),
+            // updatedAt: new Date()
+        };
+
+        const updatedAlbum = await collections.album.findOneAndUpdate(
+            { _id: validAlbumId },
+            { $set: updates }
+        ).exec();
+
+        return serializeValues(updatedAlbum);
+    } catch (error) {
+        console.error("Error updating album:", error);
+        throw new Error("Failed to update album");
+    }
+};
+
+
 export const addPhotosToAlbumAction = async (formData: FormData) => {
     const rawFormData = {
         files: [] as File[],
@@ -72,13 +128,56 @@ export const addPhotosToAlbumAction = async (formData: FormData) => {
     const images = result.data.map((file, index) => ({
         albumId: album._id,
         url: file.url,
-        public_id: file.public_id,
+        publicId: file.public_id,
+        _id: generateObjectId()
         // order: index + 1,
     }))
     await collections.photo.insertMany(images).exec();
 
     return serializeValues({ ...album, images });
 }
+
+export const deletePhotoFromAlbumAction = async (photoId: string, albumId: string) => {
+    const { user } = await isAuth();
+    if (!user?.id) {
+        throw new Error("Unauthorized");
+    }
+    try {
+
+        const validPhotoId = toObjectId(photoId);
+        const validAlbumId = toObjectId(albumId);
+        
+        if (!validPhotoId || !validAlbumId) {
+            throw new Error("Invalid photo or album ID");
+        }
+
+        // First check if the user owns the album
+        const album = await collections.album.findOne({
+            _id: validAlbumId,
+            userId: toObjectId(user.id)
+        }).exec();
+
+        if (!album) {
+            throw new Error("Album not found or unauthorized");
+        }
+
+        // Find and delete the photo
+        const photo = await collections.photo.findOneAndDelete({
+            _id: validPhotoId,
+            albumId: validAlbumId
+        }).exec();
+
+        if (!photo) {
+            throw new Error("Photo not found");
+        }
+
+        return { success: true, message: "Photo deleted successfully" };
+    } catch (error) {
+        console.error("Error deleting photo:", error);
+        throw new Error("Failed to delete photo");
+    }
+}
+
 
 export const archiveAlbumAction = async (albumId: string) => {
     try {
