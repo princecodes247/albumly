@@ -1,5 +1,5 @@
 "use server";
-import { collections, IPhotoInput } from "@/db";
+import { collections, IAlbumLayout, IAlbumVisibility, IPhotoInput } from "@/db";
 import { putFilesInCloudinaryServer, putFilesServer } from "./upload.actions";
 
 import { serializeValues } from "@/lib/utils";
@@ -45,14 +45,16 @@ export const createAlbumAction = async (formData: FormData) => {
     }
 };
 
-interface EditAlbumInput {
+export interface EditAlbumInput {
     title?: string;
     description?: string;
-    visibility?: "private" | "public" | "unlisted";
+    visibility?: IAlbumVisibility
     password?: string | null;
     hasWatermark?: boolean;
     canDownload?: boolean;
     allowPublicUpload?: boolean;
+    layout?: IAlbumLayout;
+    gridColumns?: number;
 }
 
 export const editAlbumAction = async (id: string, input: EditAlbumInput) => {
@@ -85,7 +87,8 @@ export const editAlbumAction = async (id: string, input: EditAlbumInput) => {
             ...(input.hasWatermark !== undefined && { hasWatermark: input.hasWatermark }),
             ...(input.canDownload !== undefined && { canDownload: input.canDownload }),
             ...(input.allowPublicUpload !== undefined && { allowPublicUpload: input.allowPublicUpload }),
-            // updatedAt: new Date()
+            ...(input.layout !== undefined && { layout: input.layout }),
+            ...(input.gridColumns !== undefined && { gridColumns: input.gridColumns }),
         };
 
         const updatedAlbum = await collections.album.findOneAndUpdate(
@@ -269,7 +272,11 @@ export const getUserAlbumAction = async (id: string, userId: string) => {
 
         const album = await collections.album
             .findOne({_id: validId, userId: validUserId, archivedAt: null})
-            .populate({ photos: true })
+            .populate({ photos: {
+                sort: {
+                    createdAt: -1
+                }
+            } })
             .exec();
 
         if (!album) {

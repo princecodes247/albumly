@@ -4,6 +4,8 @@ import { newId } from "@/lib/id-helper";
 import path from "node:path";
 import { convertToSlug } from "@/lib/utils";
 import { getCloudinaryClient } from "@/lib/cloudinary";
+import R2 from "@/lib/r2";
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 
 export const putFileServer = async (formData: FormData) => {
 
@@ -15,7 +17,7 @@ export const putFileServer = async (formData: FormData) => {
       data: null,
     };
   const { data } = await putFileInCloudinaryServer({ file: rawFormData.file });
-
+    // const {data} = await putFileInR2Server({ file: rawFormData.file });
   return { data };
 };
 
@@ -55,6 +57,44 @@ export const putFileInCloudinaryServer = async ({
       data: {
         url: result.secure_url,
         public_id: result.public_id,
+      },
+    };
+  } catch (error) {
+    console.error("Error uploading file to Cloudinary", error);
+    throw error;
+  }
+};
+
+export const putFileInR2Server = async ({
+  file,
+  photoId,
+}: {
+  file: File;
+  photoId?: string;
+}) => {
+  if (!photoId) {
+    photoId = newId("photo");
+  }
+
+  const { name, ext } = path.parse(file.name);
+  const key = `${photoId}-${convertToSlug(name)}`;
+
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  console.log({ key, ext, file });
+  try {
+      const params = {
+        Bucket: process.env.R2_BUCKET,
+        Key: key,
+        Body: buffer,
+        ContentType: file.type,
+      };
+    
+      const result = await R2.send(new PutObjectCommand(params));
+    return {
+      data: {
+        // url: result.Expiration,
+        // public_id: result.public_id,
       },
     };
   } catch (error) {

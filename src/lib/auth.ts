@@ -10,7 +10,7 @@ export const auth = betterAuth({
     accountLinking: {
         enabled: true,
         trustedProviders: ["google"]
-    }
+    },
     // socialProviders: { 
     //    github: { 
     //     clientId: process.env.GITHUB_CLIENT_ID, 

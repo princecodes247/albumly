@@ -128,7 +128,7 @@ const Hero = () => {
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto border-white/20 text-white hover:bg-white/10 px-8 py-6"
+                  className="w-full sm:w-auto border-white/20 text-black hover:text-white hover:bg-white/10 px-8 py-6"
                 >
                   View Demo
                 </Button>

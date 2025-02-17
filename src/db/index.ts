@@ -15,6 +15,25 @@ const UserSchema = createSchema("user", {
   storageUsed: number().default(0),
   storageLimit: number().default(1000), // in MB
   isVerified: boolean().default(false),
+  // Profile settings
+  avatar: string().nullable().default(null),
+  bio: string().nullable().default(null),
+  website: string().nullable().default(null),
+  location: string().nullable().default(null),
+ 
+  // Privacy settings
+  defaultAlbumVisibility: literal("private", "public", "unlisted").default("private"),
+  showEmail: boolean().default(false),
+  allowTagging: boolean().default(true),
+  // Billing preferences
+  defaultPaymentMethod: string().nullable().default(null),
+  autoRenewSubscription: boolean().default(true),
+  billingEmail: string().nullable().default(null),
+  // Theme preferences
+  theme: literal("light", "dark", "system").default("system"),
+  // API access
+  apiKey: string().nullable().default(null),
+  apiKeyLastUsed: date().nullable().default(null),
   createdAt: createdAt(),
   updatedAt: updatedAt(),
 });
@@ -46,6 +65,9 @@ const _AlbumSchema = createSchema("album", {
   userId: objectId(),
   archivedAt: date().nullable().default(null),
   visibility: literal("private", "public", "unlisted").default("private"),
+  layout: literal("grid", "masonry", "focused", "timeline").default("grid"),
+  gridColumns: number().default(3),
+  coverPhoto: objectId().optional(),
   password: string().nullable().default(null),
   allowPublicUpload: boolean().default(false), // Add this field
   expiresAt: date().nullable().default(null),
@@ -88,7 +110,8 @@ const SessionSchema = _SessionSchema.relations(({one}) => (
 
 const AlbumSchema = _AlbumSchema.relations(({ref, one}) => ({
     userId: one(UserSchema, "_id"),
-    photos: ref(_PhotoSchema, "albumId", "_id")
+    photos: ref(_PhotoSchema, "albumId", "_id"),
+    coverPhoto: one(_PhotoSchema, "_id").optional(),
 }))
 
 const PhotoSchema = _PhotoSchema.relations(({one}) => ({
@@ -141,6 +164,34 @@ const AnalyticsSchema = _AnalyticsSchema.relations(({one}) => ({
   photoId: one(_PhotoSchema, "_id")
 }));
 
+const _UserSettingsSchema = createSchema("userSettings", {
+  userId: objectId(),
+  // Display preferences
+  language: string().default("en"),
+  timezone: string().default("UTC"),
+  dateFormat: string().default("YYYY-MM-DD"),
+  timeFormat: string().default("24h"),
+  // Album defaults
+  defaultWatermark: string().nullable().default(null),
+  defaultAlbumExpiration: number().nullable().default(null), // in days
+  defaultDownloadQuality: literal("original", "high", "medium", "low").default("high"),
+  // Storage preferences
+  autoDeleteExpiredContent: boolean().default(false),
+  compressUploads: boolean().default(true),
+  createdAt: createdAt(),
+  updatedAt: updatedAt(),
+   // Notification preferences
+   emailNotifications: boolean().default(true),
+   pushNotifications: boolean().default(true),
+   notifyOnComments: boolean().default(true),
+   notifyOnLikes: boolean().default(true),
+   notifyOnShares: boolean().default(true),
+});
+
+const UserSettingsSchema = _UserSettingsSchema.relations(({one}) => ({
+  userId: one(UserSchema, "_id")
+}));
+
 const { db, collections } = createDatabase(client.db(), {
   user: UserSchema,
   account: AccountSchema,
@@ -150,10 +201,12 @@ const { db, collections } = createDatabase(client.db(), {
   notification: NotificationSchema,
   comment: CommentSchema,
   analytics: AnalyticsSchema,
+  userSettings: UserSettingsSchema,
 });
 
 export type IAlbum = InferSchemaOutput<typeof AlbumSchema>
 export type IAlbumVisibility = InferSchemaOutput<typeof AlbumSchema>["visibility"]
+export type IAlbumLayout = InferSchemaOutput<typeof AlbumSchema>["layout"]
 export type IPhotoInput = InferSchemaInput<typeof PhotoSchema>
 export type IPhoto = InferSchemaOutput<typeof PhotoSchema>
  

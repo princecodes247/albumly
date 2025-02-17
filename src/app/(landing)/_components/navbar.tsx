@@ -15,7 +15,7 @@ function Navbar() {
       </div>
       <div className="flex items-center gap-4">
         <Link href="/login">
-          <Button variant="ghost" className="text-sm text-white/70 hover:text-white">
+          <Button variant="ghost" className="text-sm text-white/70 hover:bg-black hover:text-white">
             Log in
           </Button>
         </Link>

@@ -1,25 +1,20 @@
 'use client';
 
 import { IAlbum, IAlbumVisibility } from "@/db";
+import { motion } from "framer-motion";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { AlbumLayoutSelect } from "./album-layout-select";
+import { EditAlbumInput } from "@/actions/album.actions";
 
 interface AlbumSettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  albumSettings: {
-    title: string;
-    description: string;
-    visibility: IAlbumVisibility;
-    password: string;
-    hasWatermark: boolean;
-    canDownload: boolean;
-    allowPublicUpload: boolean;
-  };
+  albumSettings: Partial<EditAlbumInput>
   onSettingsChange: (settings: any) => void;
   handleChange: () => Promise<void>;
 }
@@ -76,7 +71,7 @@ export function AlbumSettingsDialog({
               <Input
                 id="password"
                 type="password"
-                value={albumSettings.password}
+                value={albumSettings?.password ?? ""}
                 onChange={(e) => onSettingsChange({ ...albumSettings, password: e.target.value })}
               />
             </div>
@@ -104,6 +99,32 @@ export function AlbumSettingsDialog({
               checked={albumSettings.allowPublicUpload}
               onCheckedChange={(checked) => onSettingsChange({ ...albumSettings, allowPublicUpload: checked })}
             />
+          </div>
+          <div className="space-y-4">
+            <Label>Layout Settings</Label>
+            <AlbumLayoutSelect
+              layout={albumSettings?.layout ?? "grid"}
+              onLayoutChange={(layout) => onSettingsChange({ ...albumSettings, layout })}
+            />
+
+            {albumSettings.layout === "grid" && (
+              <div className="grid gap-2">
+                <Label htmlFor="gridColumns">Grid Columns</Label>
+                <Select
+                  value={albumSettings?.gridColumns?.toString()}
+                  onValueChange={(value) => onSettingsChange({ ...albumSettings, gridColumns: parseInt(value) })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select number of columns" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="2">2 Columns</SelectItem>
+                    <SelectItem value="3">3 Columns</SelectItem>
+                    <SelectItem value="4">4 Columns</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
           </div>
         </div>
         <Button onClick={async () => {

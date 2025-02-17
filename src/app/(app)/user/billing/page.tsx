@@ -1,16 +1,8 @@
-
 import { isAuth } from "@/middleware/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, CreditCard, Zap, Receipt } from "lucide-react";
 import { UpdatePaymentDialog } from "@/components/update-payment-dialog";
-import { Polar } from "@polar-sh/sdk";
-import Link from "next/link";
-
-const polar = new Polar({
-  server: "sandbox",
-  accessToken: process.env.NEXT_PUBLIC_POLAR_ACCESS_TOKEN ?? "",
-});
 
 export default async function BillingPage() {
   const session = await isAuth();
@@ -22,7 +14,6 @@ export default async function BillingPage() {
       description: "Perfect for getting started",
       features: ["5 albums", "100 photos per album", "Basic analytics", "Standard support"],
       current: true,
-      polarId: "free"
     },
     {
       name: "Pro",
@@ -30,7 +21,6 @@ export default async function BillingPage() {
       description: "Best for photographers",
       features: ["Unlimited albums", "1000 photos per album", "Advanced analytics", "Priority support", "Custom watermarks", "Download originals"],
       current: false,
-      polarId: "51db2ae2-9040-41fb-a59f-20bac2c1497a"
     },
     {
       name: "Business",
@@ -38,21 +28,15 @@ export default async function BillingPage() {
       description: "For professional studios",
       features: ["Everything in Pro", "Unlimited photos", "Team collaboration", "API access", "24/7 support", "Custom domain"],
       current: false,
-      polarId: "business-tier"
     },
   ];
 
-// Mock billing history - In a real app, this would come from your database
-const billingHistory = [
-  { date: "2024-01-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
-  { date: "2023-12-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
-  { date: "2023-11-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
-];
-
-
-  const handleUpgrade = async (planId: string) => {
-   
-  };
+  // Mock billing history - In a real app, this would come from your database
+  const billingHistory = [
+    { date: "2024-01-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
+    { date: "2023-12-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
+    { date: "2023-11-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
+  ];
 
   return (
     <div className="container mx-auto p-8 max-w-5xl">
@@ -126,27 +110,14 @@ const billingHistory = [
                   ))}
                 </div>
               </div>
-              {!plan.current && (
-                  <Link className="h-8 flex flex-row items-center justify-center rounded-full bg-white text-black font-medium px-4" href={`/checkout?productId=${plan.polarId}`}>
-                <Button 
-                  className="ml-4" 
-                  size="sm"
-                //   onClick={() => handleUpgrade(plan.polarId)}
-                >
-                  Upgrade
-                </Button>
-                </Link>
-              )}
-              {plan.current && (
-                <Button
-                  className="ml-4"
-                  variant="outline"
-                  disabled
-                  size="sm"
-                >
-                  Current
-                </Button>
-              )}
+              <Button
+                className="ml-4"
+                variant={plan.current ? "outline" : "default"}
+                disabled={plan.current}
+                size="sm"
+              >
+                {plan.current ? "Current" : "Upgrade"}
+              </Button>
             </div>
           ))}
         </div>
