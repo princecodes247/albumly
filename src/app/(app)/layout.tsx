@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/fragments/app-sidebar"
 import Header from "@/components/fragments/header"
 import { MobileNav } from "@/components/fragments/mobile-nav"
 import { SidebarProvider } from "@/components/ui/sidebar"
+import { Toaster } from "@/components/ui/toaster"
 import { AppLayout } from "@/layouts/app-layout"
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -9,7 +10,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <main className="h-full relative">
         <SidebarProvider className="border flex-col">
-
+        
           <div className="relative flex pb-14">
 
             <AppSidebar />
@@ -24,6 +25,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           </div>
           <MobileNav />
+          <Toaster/>
         </SidebarProvider>
       </main>
     </>

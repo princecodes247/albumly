@@ -1,7 +1,7 @@
 import { array, boolean, createClient, createdAt, createDatabase, createSchema, date, InferSchemaInput, InferSchemaOutput, literal, number, objectId, string, updatedAt } from "monarch-orm";
 
  
-const client = createClient('mongodb://localhost:27017/albumly')
+const client = createClient(process.env.MONGODB_URI!)
  
 const UserSchema = createSchema("user", {
   name: string(),

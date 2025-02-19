@@ -1,12 +1,18 @@
+"use client"
 import { isAuth } from "@/middleware/auth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Check, CreditCard, Zap, Receipt } from "lucide-react";
 import { UpdatePaymentDialog } from "@/components/update-payment-dialog";
 
-export default async function BillingPage() {
-  const session = await isAuth();
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { createCheckout } from "@/actions/payment.actions";
+import { toast } from "@/hooks/use-toast";
 
+export default function BillingPage() {
+  // const session = await isAuth();
+  const router = useRouter()
   const plans = [
     {
       name: "Free",
@@ -14,6 +20,7 @@ export default async function BillingPage() {
       description: "Perfect for getting started",
       features: ["5 albums", "100 photos per album", "Basic analytics", "Standard support"],
       current: true,
+      productId: "2e3cd550-efac-4e3b-83c6-9a8bdd139ce0"
     },
     {
       name: "Pro",
@@ -21,6 +28,7 @@ export default async function BillingPage() {
       description: "Best for photographers",
       features: ["Unlimited albums", "1000 photos per album", "Advanced analytics", "Priority support", "Custom watermarks", "Download originals"],
       current: false,
+      productId: "51db2ae2-9040-41fb-a59f-20bac2c1497a"
     },
     {
       name: "Business",
@@ -28,6 +36,7 @@ export default async function BillingPage() {
       description: "For professional studios",
       features: ["Everything in Pro", "Unlimited photos", "Team collaboration", "API access", "24/7 support", "Custom domain"],
       current: false,
+      productId: "2e3cd550-efac-4e3b-83c6-9a8bdd139ce0"
     },
   ];
 
@@ -37,6 +46,27 @@ export default async function BillingPage() {
     { date: "2023-12-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
     { date: "2023-11-01", description: "Monthly subscription - Free Plan", amount: "$0.00" },
   ];
+
+  // const billingApi = polar.checkouts.get({
+  //   id: "1234567890",
+  // });
+  const [isLoading, setIsLoading] = useState(false)
+ const handleCheckout = async (productId: string) => {
+  setIsLoading(true)
+  try {
+    const checkout = await createCheckout(productId)
+    router.push(checkout.url)
+    
+  } catch (error) {
+      console.log({error})
+      toast({
+        description: "Something went wrong, But our team is working on it."
+      })
+      setIsLoading(false)
+  }
+  
+  // return checkout
+ }
 
   return (
     <div className="container mx-auto p-8 max-w-5xl">
@@ -111,12 +141,13 @@ export default async function BillingPage() {
                 </div>
               </div>
               <Button
+              onClick={() => handleCheckout(plan.productId)}
                 className="ml-4"
                 variant={plan.current ? "outline" : "default"}
-                disabled={plan.current}
+                disabled={isLoading || plan.current}
                 size="sm"
               >
-                {plan.current ? "Current" : "Upgrade"}
+                {isLoading? "Loading..." : plan.current ? "Current" : "Upgrade"}
               </Button>
             </div>
           ))}

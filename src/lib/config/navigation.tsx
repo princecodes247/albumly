@@ -1,6 +1,6 @@
 import { Icons } from "@/components/icons";
 import { Home, PlusSquare, LayoutGrid, UserCircle, Settings } from "lucide-react";
-import { IconHome, IconHome2, IconLayoutGrid, IconSettings, IconUserCircle } from '@tabler/icons-react';
+import { IconHome, IconCoin, IconLayoutGrid, IconSettings, IconUserCircle } from '@tabler/icons-react';
 
 export const sidebarNavigationItems = [
   {
@@ -16,7 +16,7 @@ export const sidebarNavigationItems = [
   {
     title: "Billing",
     url: "/user/billing",
-    icon: <IconUserCircle className="size-5" />,
+    icon: <IconCoin className="size-5" />,
   },
   {
     title: "Settings",
